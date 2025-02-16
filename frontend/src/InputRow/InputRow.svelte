@@ -1,15 +1,18 @@
-<script>
-    import InputBox from '../InputBox/InputBox.svelte';
-    let {id, currRow}=$props();
-    let disabled=$state(false);
-    let noOfBoxes=5;
-    if(id!=currRow){
-        disabled=true;
-    }
-</script>
+    <script>
+        import InputBox from '../InputBox/InputBox.svelte';
+        let {id, currRow, noOfBoxes}=$props();
+        let disabled=$state(true);
+        
+        $effect(() => {
+            if(id==currRow){
+                disabled=false;
+            }
+        });
+        
+    </script>
 
-<div class="flex space-x-10">
-    {#each Array(noOfBoxes) as _,i}
-        <InputBox {disabled}/>
-    {/each}
-</div>
+    <div id="Row{id}" class="flex space-x-10">
+        {#each Array(noOfBoxes) as _,i}
+            <InputBox {disabled} id={i}/>
+        {/each}
+    </div>

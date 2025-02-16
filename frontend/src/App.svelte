@@ -4,13 +4,15 @@
   import InputRow from "./InputRow/InputRow.svelte";
   let name =$state('');
   let isOpen=$state(false);
-  let currRow=$state(0); // max value = 5 for now...
+  let currRow=$state(0);
   let noOfRows=6;
+  let noOfBoxes=5;
   let dialog;
   
   onMount(() => {
     dialog.showModal();
     isOpen=true;
+    window.addEventListener('keydown', handleKeyPress);
   });
 
   const closeDialog=()=>{
@@ -23,6 +25,30 @@
       closeDialog();
     }
   }
+
+  const handleKeyPress = (event) => {
+    let word = '';
+    let filled=true;
+    if (event.key === 'Enter' && currRow < noOfRows) {
+      for (let i = 0; i < noOfBoxes; i++) {
+        const input = document.getElementById(`box${i}`);
+        if (!input.value) {
+          filled=false;
+          break;
+        } 
+        word += input.value;
+      }
+      if(filled){
+        for (let i = 0; i < noOfBoxes; i++) {
+          const input = document.getElementById(`box${i}`);
+          input.style.backgroundColor = 'green';
+          input.disabled = true;
+      }
+      currRow++;
+      }
+      }
+    };
+
 </script>
 
 <main class="bg-[#121213] min-h-screen ">
@@ -32,7 +58,7 @@
 
   <section class="flex flex-col space-y-5 justify-center items-center h-[90vh]">
     {#each Array(noOfRows) as _,i}
-      <InputRow id={i} {currRow}/>
+      <InputRow id={i} {currRow} {noOfBoxes}/>
     {/each}
   </section>
 
