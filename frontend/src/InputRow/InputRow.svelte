@@ -13,6 +13,6 @@
 
     <div id="Row{id}" class="flex space-x-10">
         {#each Array(noOfBoxes) as _,i}
-            <InputBox {disabled} id={i}/>
+            <InputBox {disabled} id={i} rowid={id}/>
         {/each}
     </div>
