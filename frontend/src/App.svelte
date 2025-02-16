@@ -1,30 +1,49 @@
 <script>
   import { onMount } from "svelte";
-  let name = $state("Chinaaaaaaaaaaaaaaaaaaaaaa");
+  let name =$state('');
+  let isOpen=$state(false);
   let dialog;
   import Navbar from './Navbar/Navbar.svelte';
   
   onMount(() => {
     dialog.showModal();
+    isOpen=true;
   });
 
   const closeDialog=()=>{
     dialog.close();
+    isOpen=false;
   }
 
+  const handleSubmit=()=>{
+    if(name){
+      closeDialog();
+    }
+  }
 </script>
 
-<main class="bg-[#121213] min-h-screen">
+<main class="bg-[#121213] min-h-screen ">
   <header>
-    <Navbar name={name}/>
+    <Navbar {name}/>
   </header>
+
+  {#if isOpen}
+    <div class="fixed inset-0 backdrop-blur bg-black/50"></div>
+  {/if}
 </main>
 
 
-<dialog bind:this={dialog}>
-  <form method="dialog">
-    <label for="name">Name:</label>
-    <input type="text" id="name" bind:value={name} required placeholder="Enter your name">
-    <button type="submit" onclick={closeDialog}>Submit</button>
-  </form>
+<dialog class="bg-[#55555d] rounded-lg" bind:this={dialog}>
+  <div class="w-[35vw] h-[25vh]">
+    <form method="dialog">
+      <fieldset class="mt-5">
+        <legend class="header text-center text-2xl font-bold mb-6">Welcome to Wordle!</legend>
+
+        <div class="flex flex-col items-center space-y-5">
+          <input class="nameinput px-2 py-1 rounded-lg" type="text" bind:value={name} required placeholder="Enter your name">
+            <button class="btn bg-green-500 rounded-xl px-4 py-2 hover:bg-green-600 active:bg-green-300" type="submit" onclick={handleSubmit}>Submit</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
 </dialog>
