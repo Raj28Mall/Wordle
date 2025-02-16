@@ -1,9 +1,12 @@
 <script>
   import { onMount } from "svelte";
+  import Navbar from './Navbar/Navbar.svelte';
+  import InputRow from "./InputRow/InputRow.svelte";
   let name =$state('');
   let isOpen=$state(false);
+  let currRow=$state(0); // max value = 5 for now...
+  let noOfRows=6;
   let dialog;
-  import Navbar from './Navbar/Navbar.svelte';
   
   onMount(() => {
     dialog.showModal();
@@ -26,6 +29,12 @@
   <header>
     <Navbar {name}/>
   </header>
+
+  <section class="flex flex-col space-y-5 justify-center items-center h-[90vh]">
+    {#each Array(noOfRows) as _,i}
+      <InputRow id={i} {currRow}/>
+    {/each}
+  </section>
 
   {#if isOpen}
     <div class="fixed inset-0 backdrop-blur bg-black/50"></div>
