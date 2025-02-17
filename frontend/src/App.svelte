@@ -44,7 +44,7 @@
           input.style.backgroundColor = "green";
           input.disabled = true;
         }
-        currRow++;
+        currRow++; //reactive update
       }
     }
   };
