@@ -2,12 +2,14 @@
   import { onMount } from "svelte";
   import Navbar from "./Navbar/Navbar.svelte";
   import InputRow from "./InputRow/InputRow.svelte";
+  import guess_words from "./data/guess_words.js";
   let name = $state("");
   let isOpen = $state(false);
   let currRow = $state(0);
   let noOfRows = 6;
   let noOfBoxes = 5;
-  let dialog;
+  let guess_word=guess_words[Math.floor(Math.random() * guess_words.length)];
+  let dialog=null;
 
   onMount(() => {
     dialog.showModal();
@@ -27,7 +29,7 @@
   };
 
   const handleKeyPress = (event) => {
-    let word = "";
+    let guessed_word = "";
     let filled = true;
     if (event.key === "Enter" && currRow < noOfRows) {
       for (let i = 0; i < noOfBoxes; i++) {
@@ -36,7 +38,7 @@
           filled = false;
           break;
         }
-        word += input.value;
+        guessed_word += input.value;
       }
       if (filled) {
         for (let i = 0; i < noOfBoxes; i++) {
@@ -44,7 +46,7 @@
           input.style.backgroundColor = "green";
           input.disabled = true;
         }
-        currRow++; //reactive update
+        currRow++;
       }
     }
   };
