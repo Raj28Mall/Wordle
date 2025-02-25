@@ -44,3 +44,5 @@ Thumbs.db
 # Built files
 dist/
 build/
+
+valid_words.txt
