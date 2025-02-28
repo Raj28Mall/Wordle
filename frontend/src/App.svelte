@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import Navbar from "./Navbar/Navbar.svelte";
   import InputRow from "./InputRow/InputRow.svelte";
   import guess_words from "./data/guess_words.js";
@@ -14,7 +14,26 @@
   onMount(() => {
     dialog.showModal();
     isOpen = true;
-    window.addEventListener("keydown", handleKeyPress);
+    window.addEventListener("keydown", async(event)=>{
+      if(event.key=='Enter'){
+        const guessed_word=await handleKeyPress(event);
+        if(guessed_word && guessed_word.length===noOfBoxes){
+          if(guessed_word===guess_word){
+            alert("you won");
+          }
+          else{
+            let valid_guess=await checkValidity(guessed_word);
+            if(valid_guess){
+
+            }
+            else{
+              alert("Invalid word");
+              //clear the current row for the next input
+            }
+          }
+        }
+      }
+    });
   });
 
   const closeDialog = () => {
@@ -26,12 +45,16 @@
     if (name) {
       closeDialog();
     }
+    const firstFocus=document.getElementById(`box-${currRow}-0`);
+    if(firstFocus){
+      firstFocus.focus();
+    }
   };
 
-  const handleKeyPress = (event) => {
+  const handleKeyPress =async (event) => {
     let guessed_word = "";
     let filled = true;
-    if (event.key === "Enter" && currRow < noOfRows) {
+    if (currRow < noOfRows) {
       for (let i = 0; i < noOfBoxes; i++) {
         const input = document.getElementById(`box-${currRow}-${i}`);
         if (!input.value) {
@@ -47,9 +70,30 @@
           input.disabled = true;
         }
         currRow++;
+        await tick(); // cool ahh functionality
+        const nextInput=document.getElementById(`box-${currRow}-0`);
+        if(nextInput){
+          nextInput.focus();
+        }
       }
     }
+    else{
+      console.log("Game Over");
+    }
+
+    if(currRow===noOfRows){
+      console.log("Game Over");
+    }
+    return guessed_word;
   };
+
+  const checkValidity=async(word)=>{
+    console.log(word);
+    return true;
+    // send to backend api to check the validity of the word
+    //get response from the backend
+    //return the response from the backend
+  }
 </script>
 
 <main class="bg-[#121213] min-h-screen">

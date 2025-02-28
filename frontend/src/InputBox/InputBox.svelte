@@ -11,6 +11,10 @@
             }
         }
     }
+
+    const clearBox=()=>{
+        character='';
+    }
 </script>
 
 <div class="w-[70px] h-[70px] border border-gray-500 text-white text-center flex justify-center items-center rounded">
