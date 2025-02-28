@@ -1,6 +1,11 @@
 const express=require('express');
+const cors = require("cors");
 const mysql=require('mysql2');
 const app=express();
+
+app.use(cors());
+app.use(express.json());
+
 const db = mysql.createConnection({
     host: 'localhost',    
     user: 'root',    
@@ -10,36 +15,28 @@ const db = mysql.createConnection({
 
 app.set('view engine', 'ejs');
 
-let guessed_word='';
-async function getWord(){
-    guessed_word='GHOST';
-}
-
-async function checkValidity(word){
-    let valid=false;
-    db.query(`SELECT EXISTS(SELECT 1 FROM words WHERE word = ?) AS word_exists`, [word], 
+app.post("/check-word", async (req, res) => {
+    const { word } = req.body; // Receive word from frontend
+    if (!word) return res.status(400).json({ error: "No word provided" });
+  
+    console.log("Received word:", word);
+  
+    db.query(
+      `SELECT EXISTS(SELECT 1 FROM words WHERE word = ?) AS word_exists`,
+      [word],
       (err, results) => {
         if (err) {
-            console.error("Database Error: ", err);
+          console.error("Database Error: ", err);
+          return res.status(500).json({ error: "Database error" });
         }
-        
-        if(results[0].word_exists){
-            valid=true;
-        }
-    });
-    return valid;
-}
-
-async function handleValidity(){
-    await getWord();
-    let valid=await checkValidity(guessed_word);
-    if(valid){
-        //send response
-    }
-    else{
-        //send response
-    }
-}
+  
+        const isValid = results[0].word_exists === 1;
+        console.log(word+" exists in database: "+isValid); 
+        res.json({ isValid }); 
+      }
+    );
+});
+  
 
 const PORT=3000;
 app.listen(PORT);
