@@ -9,12 +9,13 @@
   let currRow = $state(0);
   let noOfRows = 6;
   let noOfBoxes = 5;
-  let guess_word = "HELLO";
+  let guess_word;
   let dialog = null;
 
   onMount(() => {
     dialog.showModal();
     isOpen = true;
+    getWord();
     window.addEventListener("keydown", async (event) => {
       if (event.key == "Enter") {
         const guessed_word = await handleKeyPress(event);
@@ -31,10 +32,19 @@
           } else {
             let valid_guess = await checkValidity(guessed_word);
             if (valid_guess) {
-              await handleColourChange(guessed_word);
+              const colour_reponse = await handleColourChange(guessed_word);
+              if (colour_reponse) {
+                await tick();
+              }
               const nextInput = document.getElementById(`box-${currRow}-0`);
               if (nextInput) {
                 nextInput.focus();
+              }
+              if(currRow>=noOfRows && guessed_word!=guess_word){
+                setTimeout(() => {
+                  alert("You lost the game. The word was "+guess_word);
+                  handleNewGame();
+                }, 500);
               }
             } else {
               await handleInvalidWord();
@@ -62,11 +72,13 @@
   };
 
   const getWord = () => {
-    guess_word="HELLO";
-    // guess_word = (guess_words[Math.floor(Math.random() * guess_words.length)]).toUpperCase();
+    // guess_word="HELLO";
+    guess_word = (guess_words[Math.floor(Math.random() * guess_words.length)]).toUpperCase();
+    console.log(guess_word);
   };
 
   const handleNewGame=async()=>{
+    currRow=0;
     await clearBoard();
     getWord();
   }
@@ -83,12 +95,6 @@
         }
         guessed_word += input.value;
       }
-    } else {
-      console.log("Game Over");
-    }
-
-    if (currRow === noOfRows) {
-      console.log("Game Over");
     }
     return guessed_word;
   };
@@ -138,18 +144,24 @@
   };
 
   const clearBoard = async () => {
-  currRow = 0;
-  for (let i = 0; i < noOfRows; i++) {
-    for (let j = 0; j < noOfBoxes; j++) {
-      const input = document.getElementById(`box-${i}-${j}`);
-      if (input) {
-        input.value = "";
-        input.style.backgroundColor = "transparent";
-        input.disabled = false;
+    currRow = -1; 
+    await tick(); 
+    currRow = 0;   
+    await tick(); 
+
+    for (let i = 0; i < noOfRows; i++) {
+      for (let j = 0; j < noOfBoxes; j++) {
+        const input = document.getElementById(`box-${i}-${j}`);
+        if (input) {
+          input.value = "";
+          input.style.backgroundColor = "transparent";
+          input.disabled=false;
+        }
       }
     }
-  }
-  await tick();
+    const input = document.getElementById(`box-0-0`);
+    input.focus();
+    await tick();
 }
 </script>
 
