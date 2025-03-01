@@ -3,12 +3,14 @@
   import Navbar from "./Navbar/Navbar.svelte";
   import InputRow from "./InputRow/InputRow.svelte";
   import guess_words from "./data/guess_words.js";
+  import axios from "axios";
   let name = $state("");
   let isOpen = $state(false);
   let currRow = $state(0);
   let noOfRows = 6;
   let noOfBoxes = 5;
-  let guess_word=guess_words[Math.floor(Math.random() * guess_words.length)];
+  // let guess_word=guess_words[Math.floor(Math.random() * guess_words.length)];
+  let guess_word="HELLO";
   let dialog=null;
 
   onMount(() => {
@@ -19,21 +21,34 @@
         const guessed_word=await handleKeyPress(event);
         if(guessed_word && guessed_word.length===noOfBoxes){
           if(guessed_word===guess_word){
-            alert("you won");
+            const colour_reponse=await handleColourChange(guessed_word);
+            if(colour_reponse){
+              await tick();
+            }
+            setTimeout(()=>{
+              alert("You won the game");
+            },500);
           }
           else{
             let valid_guess=await checkValidity(guessed_word);
             if(valid_guess){
-
+              await handleColourChange(guessed_word);
+              const nextInput=document.getElementById(`box-${currRow}-0`);
+              if(nextInput){
+                nextInput.focus();
+              }
             }
             else{
               alert("Invalid word");
-              //clear the current row for the next input
+              for(let i=noOfBoxes-1;i>=0;i--){
+                const input = document.getElementById(`box-${currRow}-${i}`);
+                input.value="";
+                input.focus();
             }
           }
         }
       }
-    });
+    }});
   });
 
   const closeDialog = () => {
@@ -63,19 +78,6 @@
         }
         guessed_word += input.value;
       }
-      if (filled) {
-        for (let i = 0; i < noOfBoxes; i++) {
-          const input = document.getElementById(`box-${currRow}-${i}`);
-          input.style.backgroundColor = "green";
-          input.disabled = true;
-        }
-        currRow++;
-        await tick(); // cool ahh functionality
-        const nextInput=document.getElementById(`box-${currRow}-0`);
-        if(nextInput){
-          nextInput.focus();
-        }
-      }
     }
     else{
       console.log("Game Over");
@@ -88,11 +90,29 @@
   };
 
   const checkValidity=async(word)=>{
-    console.log(word);
+    const response=await axios.post("http://localhost:3000/check-word", { word: word })
+    return(response.data.isValid);
+  }
+
+  const handleColourChange=async(word)=>{
+    for(let i=0;i<noOfBoxes;i++){
+      const input = document.getElementById(`box-${currRow}-${i}`);
+      if(word[i]!=guess_word[i]){
+        if(guess_word.includes(word[i])){
+          input.style.backgroundColor="yellow";
+        }
+        else{
+          input.style.backgroundColor="gray";
+        }
+      }
+      else{
+        input.style.backgroundColor="green";
+      }
+      input.disabled=true;
+    }
+    currRow++;
+    await tick(); // cool ahh functionality
     return true;
-    // send to backend api to check the validity of the word
-    //get response from the backend
-    //return the response from the backend
   }
 </script>
 
