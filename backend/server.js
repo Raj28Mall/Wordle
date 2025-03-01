@@ -19,8 +19,6 @@ app.post("/check-word", async (req, res) => {
     const { word } = req.body; // Receive word from frontend
     if (!word) return res.status(400).json({ error: "No word provided" });
   
-    console.log("Received word:", word);
-  
     db.query(
       `SELECT EXISTS(SELECT 1 FROM words WHERE word = ?) AS word_exists`,
       [word],
@@ -31,7 +29,6 @@ app.post("/check-word", async (req, res) => {
         }
   
         const isValid = results[0].word_exists === 1;
-        console.log(word+" exists in database: "+isValid); 
         res.json({ isValid }); 
       }
     );
