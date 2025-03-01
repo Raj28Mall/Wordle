@@ -155,7 +155,6 @@
         if (input) {
           input.value = "";
           input.style.backgroundColor = "transparent";
-          input.disabled=false;
         }
       }
     }

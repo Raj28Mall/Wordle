@@ -2,11 +2,9 @@
         import InputBox from '../InputBox/InputBox.svelte';
         let {id, currRow, noOfBoxes}=$props();
         let disabled=$state(true);
-        
-        $effect(() => {
-            if(id==currRow){
-                disabled=false;
-            }
+
+        $effect(()=>{
+            disabled= id!==currRow;
         });
         
     </script>
