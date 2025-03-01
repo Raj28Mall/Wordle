@@ -9,7 +9,6 @@
   let currRow = $state(0);
   let noOfRows = 6;
   let noOfBoxes = 5;
-  // let guess_word=guess_words[Math.floor(Math.random() * guess_words.length)];
   let guess_word = "HELLO";
   let dialog = null;
 
@@ -27,6 +26,7 @@
             }
             setTimeout(() => {
               alert("You won the game");
+              handleNewGame();
             }, 500);
           } else {
             let valid_guess = await checkValidity(guessed_word);
@@ -60,6 +60,16 @@
       firstFocus.focus();
     }
   };
+
+  const getWord = () => {
+    guess_word="HELLO";
+    // guess_word = (guess_words[Math.floor(Math.random() * guess_words.length)]).toUpperCase();
+  };
+
+  const handleNewGame=async()=>{
+    await clearBoard();
+    getWord();
+  }
 
   const handleKeyPress = async (event) => {
     let guessed_word = "";
@@ -126,6 +136,21 @@
     await tick();
     
   };
+
+  const clearBoard = async () => {
+  currRow = 0;
+  for (let i = 0; i < noOfRows; i++) {
+    for (let j = 0; j < noOfBoxes; j++) {
+      const input = document.getElementById(`box-${i}-${j}`);
+      if (input) {
+        input.value = "";
+        input.style.backgroundColor = "transparent";
+        input.disabled = false;
+      }
+    }
+  }
+  await tick();
+}
 </script>
 
 <main class="bg-[#121213] min-h-screen">
