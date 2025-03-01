@@ -1,20 +1,54 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import Navbar from "./Navbar/Navbar.svelte";
   import InputRow from "./InputRow/InputRow.svelte";
   import guess_words from "./data/guess_words.js";
+  import axios from "axios";
   let name = $state("");
   let isOpen = $state(false);
   let currRow = $state(0);
   let noOfRows = 6;
   let noOfBoxes = 5;
-  let guess_word=guess_words[Math.floor(Math.random() * guess_words.length)];
+  // let guess_word=guess_words[Math.floor(Math.random() * guess_words.length)];
+  let guess_word="HELLO";
   let dialog=null;
 
   onMount(() => {
     dialog.showModal();
     isOpen = true;
-    window.addEventListener("keydown", handleKeyPress);
+    window.addEventListener("keydown", async(event)=>{
+      if(event.key=='Enter'){
+        const guessed_word=await handleKeyPress(event);
+        if(guessed_word && guessed_word.length===noOfBoxes){
+          if(guessed_word===guess_word){
+            const colour_reponse=await handleColourChange(guessed_word);
+            if(colour_reponse){
+              await tick();
+            }
+            setTimeout(()=>{
+              alert("You won the game");
+            },500);
+          }
+          else{
+            let valid_guess=await checkValidity(guessed_word);
+            if(valid_guess){
+              await handleColourChange(guessed_word);
+              const nextInput=document.getElementById(`box-${currRow}-0`);
+              if(nextInput){
+                nextInput.focus();
+              }
+            }
+            else{
+              alert("Invalid word");
+              for(let i=noOfBoxes-1;i>=0;i--){
+                const input = document.getElementById(`box-${currRow}-${i}`);
+                input.value="";
+                input.focus();
+            }
+          }
+        }
+      }
+    }});
   });
 
   const closeDialog = () => {
@@ -26,12 +60,16 @@
     if (name) {
       closeDialog();
     }
+    const firstFocus=document.getElementById(`box-${currRow}-0`);
+    if(firstFocus){
+      firstFocus.focus();
+    }
   };
 
-  const handleKeyPress = (event) => {
+  const handleKeyPress =async (event) => {
     let guessed_word = "";
     let filled = true;
-    if (event.key === "Enter" && currRow < noOfRows) {
+    if (currRow < noOfRows) {
       for (let i = 0; i < noOfBoxes; i++) {
         const input = document.getElementById(`box-${currRow}-${i}`);
         if (!input.value) {
@@ -40,16 +78,42 @@
         }
         guessed_word += input.value;
       }
-      if (filled) {
-        for (let i = 0; i < noOfBoxes; i++) {
-          const input = document.getElementById(`box-${currRow}-${i}`);
-          input.style.backgroundColor = "green";
-          input.disabled = true;
-        }
-        currRow++;
-      }
     }
+    else{
+      console.log("Game Over");
+    }
+
+    if(currRow===noOfRows){
+      console.log("Game Over");
+    }
+    return guessed_word;
   };
+
+  const checkValidity=async(word)=>{
+    const response=await axios.post("http://localhost:3000/check-word", { word: word })
+    return(response.data.isValid);
+  }
+
+  const handleColourChange=async(word)=>{
+    for(let i=0;i<noOfBoxes;i++){
+      const input = document.getElementById(`box-${currRow}-${i}`);
+      if(word[i]!=guess_word[i]){
+        if(guess_word.includes(word[i])){
+          input.style.backgroundColor="yellow";
+        }
+        else{
+          input.style.backgroundColor="gray";
+        }
+      }
+      else{
+        input.style.backgroundColor="green";
+      }
+      input.disabled=true;
+    }
+    currRow++;
+    await tick(); // cool ahh functionality
+    return true;
+  }
 </script>
 
 <main class="bg-[#121213] min-h-screen">
